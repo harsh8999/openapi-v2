@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Product Discovery Service API
   description: Product Discovery service API documentation
-  version: 0.0.459-SNAPSHOT
+  version: 0.0.460-SNAPSHOT
 servers:
 - url: http://productdiscovery.prod.jumbotail.com:80
   description: Production environment
