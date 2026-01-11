@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Target Scheme Service API
   description: Target Scheme service API documentation
-  version: 1.137-SNAPSHOT
+  version: 1.138-SNAPSHOT
 servers:
 - url: http://target-scheme.prod.jumbotail.com:6099
   description: Production environment
