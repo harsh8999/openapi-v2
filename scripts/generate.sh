@@ -34,7 +34,7 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-GROUP_ID="com.harsh.openapi.${SERVICE_NAME}"
+GROUP_ID="com.harsh.openapi"
 BASE_OUT="generated/${SERVICE_NAME}"
 
 mkdir -p "$BASE_OUT"
@@ -45,13 +45,13 @@ mkdir -p "$BASE_OUT"
 generate() {
   local JAVA_VER="$1"
   local DATE_LIB="$2"
+  local LIBRARY="$3"
   local OUT_DIR="${BASE_OUT}/java-${JAVA_VER}"
 
   echo "🚀 Generating Java ${JAVA_VER} SDK"
 
-  ADDITIONAL_PROPS="groupId=${GROUP_ID},artifactId=${SERVICE_NAME}-sdk-java${JAVA_VER},artifactVersion=${VERSION},dateLibrary=${DATE_LIB},library=jersey2,hideGenerationTimestamp=true"
+  ADDITIONAL_PROPS="groupId=${GROUP_ID},artifactId=${SERVICE_NAME}-sdk-java${JAVA_VER},artifactVersion=${VERSION},dateLibrary=${DATE_LIB},library=${LIBRARY},hideGenerationTimestamp=true"
 
-  # Java 8 needs explicit flag
   if [[ "$JAVA_VER" == "8" ]]; then
     ADDITIONAL_PROPS="${ADDITIONAL_PROPS},java8=true"
   else
@@ -65,7 +65,7 @@ generate() {
     --additional-properties "$ADDITIONAL_PROPS"
 
   # -------------------------------------------------------------------------
-  # Apply post-generation fixes
+  # Post-generation fixes (order matters)
   # -------------------------------------------------------------------------
   ./scripts/fixes/fix-remove-example.sh "$OUT_DIR"
   ./scripts/fixes/fix-duplicate-setter.sh "$OUT_DIR"
@@ -82,8 +82,8 @@ generate() {
 # ---------------------------------------------------------------------------
 # Generate all SDK variants
 # ---------------------------------------------------------------------------
-generate 8  java8
-generate 17 java8-localdatetime
-generate 21 java11
+generate 8  java8               jersey2
+generate 17 java8-localdatetime native
+generate 21 java11              native
 
 echo "✅ SDKs generated successfully for ${SERVICE_NAME} (v${VERSION})"
