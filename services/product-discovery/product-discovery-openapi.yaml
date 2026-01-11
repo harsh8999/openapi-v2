@@ -1,0 +1,2549 @@
+openapi: 3.0.1
+info:
+  title: Product Discovery Service API
+  description: Product Discovery service API documentation
+  version: 0.0.456-SNAPSHOT
+servers:
+- url: http://productdiscovery.prod.jumbotail.com:80
+  description: Production environment
+paths:
+  /variant-config:
+    put:
+      tags:
+      - variant-configuration-controller
+      operationId: upsertVariantConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantConfigDTO'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseVoid'
+  /variant-config/upsert-async:
+    put:
+      tags:
+      - variant-configuration-controller
+      operationId: upsertVariantConfigAsync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantConfigAsyncRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /unsellable-listings:
+    put:
+      tags:
+      - unsellable-listings-controller
+      operationId: updateUnsellableListing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUnsellableListings'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseVoid'
+  /unsellable-listings/batch:
+    put:
+      tags:
+      - unsellable-listings-controller
+      operationId: batchUpdateUnsellableListings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateUnsellableListings'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /seller:
+    put:
+      tags:
+      - seller-controller
+      operationId: upsertSeller
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertSellers'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseVoid'
+  /pv:
+    put:
+      tags:
+      - product-vertical-controller
+      operationId: upsertPV
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertProductVerticals'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseVoid'
+  /product:
+    put:
+      tags:
+      - product-ingestion-controller
+      operationId: upsertProducts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertProducts'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /product-rank:
+    put:
+      tags:
+      - product-ingestion-controller
+      operationId: updateProductRank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRankingMetric'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseVoid'
+  /manufacturer:
+    put:
+      tags:
+      - manufacturer-controller
+      operationId: upsertManufacturer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertManufacturers'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /lsa:
+    put:
+      tags:
+      - listing-controller
+      operationId: upsertListingSalesAttributes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLSAs'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /listing:
+    put:
+      tags:
+      - listing-controller
+      operationId: upsertListing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertListings'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /group-rank:
+    put:
+      tags:
+      - product-group-ranking-controller
+      operationId: upsertProductGroupRank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductGroupsRank'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductGroupRankNode'
+  /combo-product:
+    put:
+      tags:
+      - product-ingestion-controller
+      operationId: upsertComboProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertComboProducts'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /category:
+    put:
+      tags:
+      - category-controller
+      operationId: upsertCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCategories'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /brand:
+    put:
+      tags:
+      - brand-controller
+      operationId: upsertBrand
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBrands'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /events/on-customer-update:
+    post:
+      tags:
+      - events-controller
+      operationId: onCustomerUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomersUpdatedEvent'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /unsellable-listings/backfill:
+    get:
+      tags:
+      - unsellable-listings-controller
+      operationId: backFillUnsellableListings
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /service_health_check:
+    get:
+      tags:
+      - health-check-controller
+      operationId: getHealthCheck
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /products/{jpin}/varieties:
+    get:
+      tags:
+      - products-controller
+      operationId: getProductVarieties
+      parameters:
+      - name: jpin
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseRelatedProductGroups'
+  /products/{jpin}/product-groups:
+    get:
+      tags:
+      - products-controller
+      operationId: getProductGroupDetails
+      parameters:
+      - name: jpin
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: sellerId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: listingId
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductGroupDetailsDTO'
+  /products/{jpin}/product-groups/v2:
+    get:
+      tags:
+      - products-controller
+      operationId: getProductGroupDetailsV2
+      parameters:
+      - name: jpin
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: sellerId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: listingId
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductGroupDetailsDTO'
+  /products/exists:
+    get:
+      tags:
+      - products-controller
+      operationId: checkIfProductsExistForParams
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /products/entity/{entityType}/exists:
+    get:
+      tags:
+      - products-controller
+      operationId: getChildEntitiesWhereProductsExist
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseListEntityDTO'
+  /products/count:
+    get:
+      tags:
+      - products-controller
+      operationId: getProductCountForQuery
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductCountDTO'
+  /products/count/{entityType}:
+    get:
+      tags:
+      - products-controller
+      operationId: getChildEntitiesWithProductCount
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseListEntityDTO'
+  /product/related-entities:
+    get:
+      tags:
+      - product-controller
+      operationId: getProductRelatedEntities
+      parameters:
+      - name: jpin
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProductRelatedEntities'
+  /product/list/count:
+    get:
+      tags:
+      - product-controller
+      operationId: getProductCountForQuery_1
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductCountDTO'
+  /product/exists:
+    get:
+      tags:
+      - product-controller
+      operationId: checkIfProductsExistForParams_1
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseBoolean'
+  /product/entity/{entityType}/exists:
+    get:
+      tags:
+      - product-controller
+      operationId: getChildEntitiesWhereProductsExist_1
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseListEntityDTO'
+  /product/count:
+    get:
+      tags:
+      - product-controller
+      operationId: getProductCount
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseEntityDTO'
+  /product/count/{entityType}:
+    get:
+      tags:
+      - product-controller
+      operationId: getChildEntitiesWithProductCount_1
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: entityType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseListEntityDTO'
+  /product-sanity:
+    get:
+      tags:
+      - product-sanity-controller
+      operationId: getOosReasons
+      parameters:
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: listingId
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseOosReasonDto'
+  /product-groups/:
+    get:
+      tags:
+      - product-group-controller
+      operationId: getProductGroupsList
+      parameters:
+      - in: query
+        name: params
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - in: header
+        name: customerID
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: marketplace
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: appVersion
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductGroupList'
+  /product-groups/v2/:
+    get:
+      tags:
+      - product-group-controller
+      operationId: getProductGroupsListV2
+      parameters:
+      - name: params
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: marketplace
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: appVersion
+        in: header
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseProductGroupList'
+  /ping:
+    get:
+      tags:
+      - health-check-controller
+      operationId: getPing
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /listing-details:
+    get:
+      tags:
+      - listing-details-controller
+      operationId: getWinningListingDetailsBO
+      parameters:
+      - name: listingIds
+        in: query
+        required: true
+        schema:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      - name: customerID
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RestResponseGetListingDetailsResponse'
+components:
+  schemas:
+    VariantAttribute:
+      type: object
+      properties:
+        attributeKey:
+          type: string
+        sequenceNumber:
+          type: integer
+          format: int32
+    VariantConfigDTO:
+      type: object
+      properties:
+        pvID:
+          type: string
+        brandID:
+          type: string
+        variantAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/VariantAttribute'
+        displayAttribute:
+          type: string
+          enum:
+          - MRP
+          - NET_WEIGHT
+          - NET_QUANTITY
+          - SIZE
+          - SET_DETAILS
+        variantConfigState:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - INACTIVE
+        lastUpdatedBy:
+          type: string
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+    RestError:
+      type: object
+      properties:
+        error:
+          type: string
+    RestResponseVoid:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: object
+        error:
+          $ref: '#/components/schemas/RestError'
+    VariantConfigAsyncRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        rowId:
+          type: string
+        rowExecutionId:
+          type: string
+        userId:
+          type: string
+        variantConfigRequest:
+          $ref: '#/components/schemas/VariantConfigDTO'
+    RestResponseString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: string
+        error:
+          $ref: '#/components/schemas/RestError'
+    UnsellableListingsDTO:
+      type: object
+      properties:
+        jpin:
+          type: string
+        listingIds:
+          type: array
+          items:
+            type: string
+    UpdateUnsellableListings:
+      type: object
+      properties:
+        unsellableListingsDTOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnsellableListingsDTO'
+    BatchUpdateUnsellableListings:
+      type: object
+      properties:
+        listingIds:
+          type: array
+          items:
+            type: string
+    SellerDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        orgId:
+          type: string
+        orgName:
+          type: string
+    UpsertSellers:
+      type: object
+      properties:
+        sellerList:
+          type: array
+          items:
+            $ref: '#/components/schemas/SellerDTO'
+    ProductVerticalDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        pvID:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - Active
+          - Draft
+          - Inactive
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+    UpsertProductVerticals:
+      type: object
+      properties:
+        productVerticals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVerticalDTO'
+    ProductDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        jpin:
+          type: string
+        statusString:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        imageUrlList:
+          type: array
+          items:
+            type: string
+        caseSize:
+          type: integer
+          format: int32
+        expiryPeriod:
+          type: number
+          format: double
+        expiryUnitString:
+          type: string
+        returnWindow:
+          type: integer
+          format: int32
+        businessCategoryId:
+          type: string
+        pvID:
+          type: string
+        brandID:
+          type: string
+        barcode:
+          type: string
+        pvAttributes:
+          type: object
+          additionalProperties:
+            type: object
+        productAttributes:
+          type: object
+          additionalProperties:
+            type: object
+        supplyChainAttributes:
+          type: object
+          additionalProperties:
+            type: object
+        infoRequired:
+          type: string
+          enum:
+          - BASIC
+          - COMPLETE
+        internalTitle:
+          type: string
+        productIdentifier:
+          type: string
+        availableSizeList:
+          type: array
+          items:
+            type: string
+        setDisplayName:
+          type: string
+        setCount:
+          type: integer
+          format: int32
+        packDisplayName:
+          type: string
+        packOf:
+          type: integer
+          format: int32
+        isBundle:
+          type: boolean
+        setDisplayDetails:
+          type: string
+        setDescription:
+          type: string
+        setCompositionList:
+          type: array
+          items:
+            $ref: '#/components/schemas/SetCompositionDTO'
+        productColor:
+          type: string
+        articleNumber:
+          type: string
+        modelName:
+          type: string
+        productCondition:
+          type: string
+        videoUrlList:
+          type: array
+          items:
+            type: string
+        sizeChartImageList:
+          type: array
+          items:
+            type: string
+        customerDiscoveryCategoryList:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    SetCompositionDTO:
+      type: object
+      properties:
+        variant:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+    UpsertProducts:
+      type: object
+      properties:
+        productList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDTO'
+    RestResponseBoolean:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: boolean
+        error:
+          $ref: '#/components/schemas/RestError'
+    ProductRankingMetricDTO:
+      type: object
+      properties:
+        jpin:
+          type: string
+        uniqueCustomersOrdering:
+          type: number
+          format: double
+    UpdateProductRankingMetric:
+      type: object
+      properties:
+        productRankingMetricDTOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRankingMetricDTO'
+    ManufacturerDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        manufacturerID:
+          type: string
+        manufacturerName:
+          type: string
+        status:
+          type: string
+          enum:
+          - Active
+          - Draft
+          - Inactive
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+    UpsertManufacturers:
+      type: object
+      properties:
+        manufacturerList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManufacturerDTO'
+    ListingSalesAttributesDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        listingId:
+          type: string
+        customerGrpId:
+          type: string
+        spid:
+          type: string
+        channelSpid:
+          type: string
+        mrp:
+          type: number
+        channelId:
+          type: string
+        sellerId:
+          type: string
+        ownerId:
+          type: string
+        minOrderQuantity:
+          type: integer
+          format: int32
+        maxOrderQuantity:
+          type: integer
+          format: int32
+        orderMultiples:
+          type: boolean
+        tradeOfferId:
+          type: string
+        sellingPrice:
+          type: number
+        procSLA:
+          type: integer
+          format: int32
+        geoId:
+          type: string
+        cutoffTime:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - ONBOARDING
+          - ONHOLD
+        marketplaceId:
+          type: string
+    UpsertLSAs:
+      type: object
+      properties:
+        listingSalesAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingSalesAttributesDTO'
+    ListingDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        listingId:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - ONBOARDING
+          - ONHOLD
+        spid:
+          type: string
+        channelId:
+          type: string
+        marketplaceId:
+          type: string
+    UpsertListings:
+      type: object
+      properties:
+        listingList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingDTO'
+    ProductGroupRank:
+      type: object
+      properties:
+        groupID:
+          type: string
+        selectedJpin:
+          type: string
+        geoID:
+          type: string
+        score:
+          type: number
+          format: double
+    UpdateProductGroupsRank:
+      type: object
+      properties:
+        productGroupRankList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductGroupRank'
+    GeoNode:
+      type: object
+      properties:
+        geoID:
+          type: string
+    MarketplaceNode:
+      type: object
+      properties:
+        marketplaceId:
+          type: string
+        marketplaceName:
+          type: string
+        tenantId:
+          type: string
+    ProductGroupRankNode:
+      type: object
+      properties:
+        productGrpGeoKey:
+          type: string
+        score:
+          type: number
+          format: double
+        selectedJpin:
+          type: string
+        geoNode:
+          $ref: '#/components/schemas/GeoNode'
+        marketplace:
+          $ref: '#/components/schemas/MarketplaceNode'
+    ComboProductDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        comboJpin:
+          type: string
+        barcode:
+          type: string
+        statusString:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        imageUrlList:
+          type: array
+          items:
+            type: string
+        comboCondition:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInfo'
+        sellerIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        maxQtyAllowed:
+          type: integer
+          format: int32
+        jpins:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    ProductInfo:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        qty:
+          type: integer
+          format: int32
+    UpsertComboProducts:
+      type: object
+      properties:
+        comboProductDTOS:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComboProductDTO'
+    CategoryDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        categoryID:
+          type: string
+        categoryName:
+          type: string
+        subCategoryIDList:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+          - Active
+          - Draft
+          - Inactive
+        categoryPvIDList:
+          type: array
+          items:
+            type: string
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+    UpsertCategories:
+      type: object
+      properties:
+        categoryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryDTO'
+    BrandDTO:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        brandID:
+          type: string
+        internalName:
+          type: string
+        status:
+          type: string
+          enum:
+          - Active
+          - Draft
+          - Inactive
+        manufacturerID:
+          type: string
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+    UpsertBrands:
+      type: object
+      properties:
+        brandList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrandDTO'
+    CustomersUpdatedEvent:
+      type: object
+      properties:
+        customerIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    Label:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - MRP
+          - ""
+        displayText:
+          type: string
+        value:
+          type: string
+    ProductCompact:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        imageUrl:
+          type: string
+        groupId:
+          type: string
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Label'
+    ProductGroupCompact:
+      type: object
+      properties:
+        groupId:
+          type: string
+        nameSpace:
+          type: string
+        selectedProductId:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductCompact'
+    RelatedProductGroups:
+      type: object
+      properties:
+        relatedProductGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductGroupCompact'
+    RestResponseRelatedProductGroups:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/RelatedProductGroups'
+        error:
+          $ref: '#/components/schemas/RestError'
+    AchievedMilestoneBO:
+      type: object
+      properties:
+        achievedMilestoneId:
+          type: string
+        status:
+          type: string
+        achievedAtValue:
+          type: number
+        achievedOnTime:
+          type: integer
+          format: int64
+        payoutDoneValue:
+          type: number
+        payoutType:
+          type: string
+        payoutId:
+          type: string
+        payoutReferenceId:
+          type: string
+    BasketOfferConstruct:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/OfferConstruct'
+      - type: object
+        properties:
+          offerCondition:
+            type: string
+            enum:
+            - SINGLE_ORDER
+            - SAME_ORDER_DATE
+            - SAME_DELIVERY_DATE
+            - SAME_ORDER_DATE_DURATION
+          offerThreshold:
+            $ref: '#/components/schemas/OfferThreshold'
+    BundleDetails:
+      type: object
+      properties:
+        bundleType:
+          type: string
+        itemCountInBundle:
+          type: integer
+          format: int32
+        unitOfMeasurementSingular:
+          type: string
+        unitOfMeasurementPlural:
+          type: string
+    CaseSizeDTO:
+      type: object
+      properties:
+        caseSizeLabel:
+          type: string
+        caseSizeValue:
+          type: integer
+          format: int32
+        showCaseSize:
+          type: boolean
+    CaseSizeLabel:
+      type: string
+      enum:
+        - "Case size"
+      description: Supported case size labels
+    ContributionCapBO:
+      type: object
+      properties:
+        id:
+          type: string
+        contributionCapType:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+        entityName:
+          type: string
+        capValue:
+          type: number
+        capValueType:
+          type: string
+        schemeMemberCapId:
+          type: string
+        currentValue:
+          type: number
+        capReachedTime:
+          type: integer
+          format: int64
+        lastTransactionAppliedValue:
+          type: number
+    CreditDetailsView:
+      type: object
+      properties:
+        heading:
+          type: string
+        title:
+          type: string
+        text:
+          type: string
+    CreditOfferBo:
+      type: object
+      properties:
+        offerDisplayText:
+          type: string
+    Detail:
+      type: object
+      properties:
+        iconUrl:
+          type: string
+        textHtml:
+          type: string
+        textColor:
+          type: string
+        quantityTextHtml:
+          type: string
+        quantityTextHtmlColor:
+          type: string
+    DisplayDataResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        description:
+          type: string
+        footerLabel:
+          type: string
+        params:
+          type: string
+        nextPageType:
+          type: string
+        deepLinkUrl:
+          type: string
+        payoutModeString:
+          type: string
+        payoutModeIcon:
+          type: string
+        milestoneSubtext:
+          type: string
+    EntityDisplayData:
+      type: object
+      properties:
+        displayBackgroundImage:
+          type: string
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+        displaySubtext:
+          type: string
+        description:
+          type: string
+        label:
+          type: string
+        entityID:
+          type: string
+    EntityId:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ruleId:
+          type: string
+    GroupInclusionRuleBO:
+      type: object
+      properties:
+        entityType:
+          type: string
+        includedEntries:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityId'
+        excludedEntries:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityId'
+    HeaderDetails:
+      type: object
+      properties:
+        headerBgColor:
+          type: string
+        headerIconUrl:
+          type: string
+        headerTextHtml:
+          type: string
+        headerTextColor:
+          type: string
+    JTOfferBO:
+      type: object
+      properties:
+        jtOfferId:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - EXPIRED
+        startTime:
+          type: integer
+          format: int64
+        endTime:
+          type: integer
+          format: int64
+        jtOfferDefinitionId:
+          type: string
+        jtOfferType:
+          type: string
+          enum:
+          - VOLUME
+          - BASKET
+          - ASSORTMENT
+          - USERACTIVITY
+          - PRICECUT
+          - FREESHIPPING
+          - ENTITY
+          - FREEBIE
+          - CREDIT
+        jtOfferTypeString:
+          type: string
+        customerTargetGroupId:
+          type: string
+        segmentId:
+          type: string
+        bzids:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        listingTargetGroupId:
+          type: string
+        exclusionListingEntityId:
+          type: string
+        exclusionListingEntityType:
+          type: string
+          enum:
+          - LISTING_TARGET_GROUP
+          - LISTING_ID
+        mutuallyExclusive:
+          type: string
+          enum:
+          - SAME_CUSTOMER_TARGET_GROUP
+          - NONE
+        displayData:
+          $ref: '#/components/schemas/EntityDisplayData'
+        listings:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        jtOfferCondition:
+          $ref: '#/components/schemas/JTOfferConditionBO'
+        jtOfferPayout:
+          $ref: '#/components/schemas/JTOfferPayoutBO'
+        jtOfferBurnThresholdBOs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBurnThresholdBO'
+        priorityScore:
+          type: integer
+          format: int32
+        nearExpiry:
+          type: boolean
+        offerRequestor:
+          type: string
+        offerOwner:
+          type: string
+        minAmountToAvailOffer:
+          type: number
+        jtOfferIssuer:
+          type: string
+        initiatorType:
+          type: string
+        initiatorId:
+          type: string
+        tenantId:
+          type: string
+        marketplaceId:
+          type: string
+        perBusinessMaxAvailLimit:
+          type: integer
+          format: int64
+        jpinJTOfferPayoutMapForComboProductOffers:
+          type: object
+          additionalProperties:
+            type: number
+        purposeType:
+          type: string
+        purposeReferenceId:
+          type: string
+        autoApplyOffer:
+          type: boolean
+    JTOfferBurnThresholdBO:
+      type: object
+      properties:
+        jtOfferBurnThresholdType:
+          type: string
+          enum:
+          - DISCOUNTED_AMOUNT_BURN
+          - DISCOUNTED_QUANTITY_BURN
+          - DISCOUNTED_QUANTITY_BURN_PER_CUSTOMER
+        maxBurnThreshold:
+          type: number
+    JTOfferConditionBO:
+      type: object
+      properties:
+        offerConditionType:
+          type: string
+          enum:
+          - LISTING_VOLUME_OFFER
+          - APP_UPGRADE
+          - ENTITY
+          - CART_ITEM
+          - PAYMENT_AMOUNT
+          - NONE
+        offerConditionTypeStr:
+          type: string
+        threshold:
+          type: integer
+          format: int64
+        thresholdQuantity:
+          type: integer
+          format: int32
+        thresholdAmount:
+          type: number
+        offerThresholdType:
+          type: string
+          enum:
+          - AMOUNT
+          - QUANTITY
+        inclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        inclusionEntityIds:
+          type: array
+          items:
+            type: string
+        exclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        exclusionEntityIds:
+          type: array
+          items:
+            type: string
+    JTOfferPayoutBO:
+      type: object
+      properties:
+        offerPayoutType:
+          type: string
+          enum:
+          - PER_UNIT_ABSOLUTE_PRICE
+          - PER_UNIT_PERCENTAGE_DISCOUNT
+          - PER_UNIT_CASH_DISCOUNT
+          - CASH_DISCOUNT
+          - SHIPPING_DISCOUNT
+          - FLAT_SHIPPING
+          - FREEBIE
+          - ADDITIONAL_VOLUME_PERCENT
+          - OFFER
+          - PRICE_CUT
+          - FLAT_DISCOUNT
+          - JUMBOCASH
+          - DIFFERENTIAL_CREDIT
+          - SHIPPING_CHARGE_CASHBACK
+        offerPayoutTypeStr:
+          type: string
+        payout:
+          type: number
+        payoutDisplayString:
+          type: string
+        listingIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        listingGroup:
+          type: string
+        mainJpinQty:
+          type: integer
+          format: int64
+        applyMultipleTimesAllowed:
+          type: boolean
+        freebieJpin:
+          type: string
+        freebieQuantity:
+          type: integer
+          format: int64
+        freebieTitle:
+          type: string
+        interestRate:
+          type: number
+        subsidizedDays:
+          type: integer
+          format: int64
+        convenienceFeeRate:
+          type: number
+        convenienceFeeTaxPercentage:
+          type: number
+        tenure:
+          type: integer
+          format: int32
+        shippingChargeCashbackValue:
+          type: number
+        shippingChargeCashbackType:
+          type: string
+          enum:
+          - PERCENTAGE
+          - CASH
+        payoutDiscountType:
+          type: string
+          enum:
+          - PERCENTAGE
+          - CASH
+    LabelDTO:
+      type: object
+      properties:
+        labelPropertiesId:
+          type: string
+        displayTitle:
+          type: string
+        description:
+          type: string
+        displayLogo:
+          type: string
+        textColor:
+          type: string
+        backgroundColor:
+          type: string
+    ListingDetailsDTO:
+      type: object
+      properties:
+        listingId:
+          type: string
+        spId:
+          type: string
+        jpin:
+          type: string
+        sellingPrice:
+          type: number
+        sellingPricePerUom:
+          type: number
+        sellerId:
+          type: string
+        channelId:
+          type: string
+        sellerName:
+          type: string
+        minOrderQuantity:
+          type: integer
+          format: int32
+        maxOrderQuantity:
+          type: integer
+          format: int32
+        mrp:
+          type: number
+        mrpPerUom:
+          type: number
+        shippingChargePerUom:
+          type: string
+        availableQuantity:
+          type: integer
+          format: int32
+        tradeOffer:
+          $ref: '#/components/schemas/OfferBO'
+        jtOfferBOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBO'
+        creditOfferBo:
+          $ref: '#/components/schemas/CreditOfferBo'
+        minOrderQuantityMultiples:
+          type: boolean
+        freebieListingDetails:
+          $ref: '#/components/schemas/ListingDetailsDTO'
+        qtyPromiseDetailsMap:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PromiseDetails'
+        winningListingsForComboProductJpins:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ListingDetailsDTO'
+    ManufacturerOfferConstruct:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/OfferConstruct'
+      - type: object
+        properties:
+          offerThreshold:
+            type: integer
+            format: int32
+    MilestoneBO:
+      type: object
+      properties:
+        milestoneId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        atValue:
+          type: number
+        payoutBOs:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/PayoutBO'
+        achievedMilestoneBO:
+          $ref: '#/components/schemas/AchievedMilestoneBO'
+    OfferBO:
+      type: object
+      properties:
+        offerId:
+          type: string
+        offerTypeString:
+          type: string
+        active:
+          type: boolean
+        discountDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferDiscountDetailsBO'
+        offerType:
+          type: string
+          enum:
+          - Absolute Price
+          - Percentage Discount
+          - Cash Discount
+    OfferConstruct:
+      required:
+      - type
+      type: object
+      properties:
+        packagingType:
+          type: string
+          enum:
+          - SEPARATE
+          - INSIDE
+          - WRAPPED
+        offerPayout:
+          $ref: '#/components/schemas/OfferPayout'
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    OfferDiscountDetailsBO:
+      type: object
+      properties:
+        volumeThreshold:
+          type: integer
+          format: int32
+        offer:
+          type: number
+        computedOfferPrice:
+          type: number
+          writeOnly: true
+    OfferPayout:
+      type: object
+      properties:
+        offerPayoutTypeObjectMap:
+          type: object
+          additionalProperties:
+            type: object
+    OfferThreshold:
+      type: object
+      properties:
+        offerThresholdMap:
+          type: object
+          additionalProperties:
+            type: object
+    PayoutBO:
+      type: object
+      properties:
+        payoutId:
+          type: string
+        payoutMode:
+          type: string
+        payoutType:
+          type: string
+        value:
+          type: number
+    ProductDetailsDTO:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailsResponseImageUrlsItem'
+        brandId:
+          type: string
+        brand:
+          type: string
+        pvID:
+          type: string
+        manufacturerId:
+          type: string
+        barcodes:
+          type: array
+          items:
+            type: string
+        groupId:
+          type: string
+        layout:
+          type: string
+          enum:
+          - OLD
+          - PERUNIT
+          - MARGINS
+        netQuantityMeasuringUnit:
+          type: string
+        netQuantity:
+          type: string
+        netWeightMeasuringUnit:
+          type: string
+        netWeight:
+          type: string
+        packagingType:
+          type: string
+        displayAttributeLabel:
+          type: string
+        displayAttributeValue:
+          type: string
+        winningListingDetails:
+          $ref: '#/components/schemas/ListingDetailsDTO'
+        schemeMemberTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMemberTargetResponse'
+        productOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailsResponseProductOffersItem'
+        creditDetails:
+          $ref: '#/components/schemas/CreditDetailsView'
+        caseDetails:
+          $ref: '#/components/schemas/CaseSizeDTO'
+        comboProductInfoList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInfoForComboProduct'
+        isComboProduct:
+          type: boolean
+        comboProductLabel:
+          type: string
+        stockDetailsResponse:
+          $ref: '#/components/schemas/StockDetailsResponse'
+        rating:
+          type: number
+          format: float
+        ppvQueryParams:
+          type: string
+        layoutLabelDTOMap:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/LabelDTO'
+        bundleDetails:
+          $ref: '#/components/schemas/BundleDetails'
+    ProductDetailsResponseImageUrlsItem:
+      type: object
+      properties:
+        fullImage:
+          type: string
+        thumbnail:
+          type: string
+    ProductDetailsResponseProductOffersItem:
+      type: object
+      properties:
+        offerID:
+          type: string
+        offerTitle:
+          type: string
+        offerSubtitle:
+          type: string
+        offerDescription:
+          type: string
+        startDate:
+          type: integer
+          format: int64
+        endDate:
+          type: integer
+          format: int64
+        offerImageUrl:
+          type: string
+        imagePosition:
+          type: integer
+          format: int32
+        offerConstructType:
+          type: string
+          enum:
+          - VOLUME_OFFER
+          - BASKET_OFFER
+          - MANUFACTURER_OFFER
+        offerConstructDetails:
+          # nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/BasketOfferConstruct'
+          - $ref: '#/components/schemas/ManufacturerOfferConstruct'
+          - $ref: '#/components/schemas/VolumeOfferConstruct'
+    ProductGroupDetailsDTO:
+      type: object
+      properties:
+        productsDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailsDTO'
+        groupId:
+          type: string
+        rank:
+          type: number
+          format: double
+        selectedJpin:
+          type: string
+    ProductInfoForComboProduct:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        qty:
+          type: integer
+          format: int32
+    PromiseDetails:
+      type: object
+      properties:
+        promiseTime:
+          type: integer
+          format: int64
+        deliveryPromiseMessage:
+          type: string
+        cutOffTimeMessage:
+          type: string
+        thresholdCrossAlertTitle:
+          type: string
+        thresholdCrossAlert:
+          type: string
+        cutOffTime:
+          type: integer
+          format: int64
+    RestResponseProductGroupDetailsDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/ProductGroupDetailsDTO'
+        error:
+          $ref: '#/components/schemas/RestError'
+    SchemeMemberTargetBO:
+      type: object
+      properties:
+        schemeMemberTargetId:
+          type: string
+        memberId:
+          type: string
+        currentValue:
+          type: number
+        lastTransactionAppliedValue:
+          type: number
+        targetSchemeBO:
+          $ref: '../target-scheme/target-scheme-openapi.yaml#/components/schemas/TargetSchemeBO'
+    SchemeMemberTargetResponse:
+      type: object
+      properties:
+        schemeMemberTargetBO:
+          $ref: '#/components/schemas/SchemeMemberTargetBO'
+        displayData:
+          $ref: '#/components/schemas/DisplayDataResponse'
+    StockDetails:
+      type: object
+      properties:
+        detailsBgColor:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/Detail'
+    StockDetailsResponse:
+      type: object
+      properties:
+        showNewUI:
+          type: boolean
+        headerDetails:
+          $ref: '#/components/schemas/HeaderDetails'
+        stockDetails:
+          $ref: '#/components/schemas/StockDetails'
+        isDeadStock:
+          type: boolean
+    VolumeOfferConstruct:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/OfferConstruct'
+      - type: object
+        properties:
+          offerThreshold:
+            type: integer
+            format: int32
+          offerCondition:
+            type: string
+            enum:
+            - SINGLE_ORDER
+            - SAME_ORDER_DATE
+            - SAME_DELIVERY_DATE
+            - SAME_ORDER_DATE_DURATION
+    EntityDTO:
+      type: object
+      properties:
+        entityId:
+          type: string
+        productsCount:
+          type: integer
+          format: int32
+    RestResponseListEntityDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityDTO'
+        error:
+          $ref: '#/components/schemas/RestError'
+    ProductCountDTO:
+      type: object
+      properties:
+        productsCount:
+          type: integer
+          format: int32
+    RestResponseProductCountDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/ProductCountDTO'
+        error:
+          $ref: '#/components/schemas/RestError'
+    ProductRelatedEntities:
+      type: object
+      properties:
+        jpin:
+          type: string
+        categoryIds:
+          type: array
+          items:
+            type: string
+        manufacturerId:
+          type: string
+    RestResponseEntityDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/EntityDTO'
+        error:
+          $ref: '#/components/schemas/RestError'
+    OosReasonDto:
+      type: object
+      properties:
+        reason:
+          type: string
+        description:
+          type: string
+    RestResponseOosReasonDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/OosReasonDto'
+        error:
+          $ref: '#/components/schemas/RestError'
+    Filter:
+      type: object
+      properties:
+        filterItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterItem'
+    FilterDisplayDetails:
+      type: object
+      properties:
+        backgroundColor:
+          type: string
+        borderColor:
+          type: string
+        filterName:
+          type: string
+        prefixIcon:
+          type: string
+        suffixIcon:
+          type: string
+    FilterItem:
+      type: object
+      properties:
+        filterId:
+          type: string
+        filterDisplayDetails:
+          $ref: '#/components/schemas/FilterDisplayDetails'
+        filterState:
+          type: string
+          enum:
+          - ENABLED
+          - DISABLED
+          - SELECTED
+        filterType:
+          type: string
+          enum:
+          - GOLD_TARGET_SCHEME
+          - CASHBACK_OFFERS
+          - FREE_DELIVERY
+        sequence:
+          type: integer
+          format: int32
+        purposeType:
+          type: string
+          enum:
+          - MEMBERSHIP_BENEFIT
+    ProductGroupList:
+      type: object
+      properties:
+        productGroupListTitle:
+          type: string
+        productGroupResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductGroupDetailsDTO'
+        filter:
+          $ref: '#/components/schemas/Filter'
+    RestResponseProductGroupList:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/ProductGroupList'
+        error:
+          $ref: '#/components/schemas/RestError'
+    GetListingDetailsResponse:
+      type: object
+      properties:
+        listingDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingDetailsDTO'
+    RestResponseGetListingDetailsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/GetListingDetailsResponse'
+        error:
+          $ref: '#/components/schemas/RestError'

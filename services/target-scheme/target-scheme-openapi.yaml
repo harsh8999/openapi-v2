@@ -1,0 +1,2885 @@
+openapi: 3.0.1
+info:
+  title: Target Scheme Service API
+  description: Target Scheme service API documentation
+  version: 1.137-SNAPSHOT
+servers:
+- url: http://target-scheme.prod.jumbotail.com:6099
+  description: Production environment
+tags:
+- name: Events
+  description: APIs for processing target scheme events
+- name: Payout
+  description: APIs for target scheme payouts
+- name: Target Scheme
+  description: APIs for managing target schemes
+paths:
+  /event/order-item-cancelled:
+    post:
+      tags:
+      - Events
+      operationId: processEventOrderItemCancelled
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/OrderItemMarkedCancelledEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /event/order-placed:
+    post:
+      tags:
+      - Events
+      summary: Process order placed event
+      description: Processes marketplace order placed event for target scheme
+      operationId: processMPOrderPlacedV2
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        description: Idempotency key for event processing
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        description: Message ID
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        description: Group ID for message ordering
+        schema:
+          type: string
+      requestBody:
+        description: Marketplace order placed event
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/MPOrderPlacedEvent'
+        required: true
+      responses:
+        '200':
+          description: Event processed successfully
+        '400':
+          description: Invalid event data
+        '500':
+          description: Internal server error
+  /event/order-item-returned:
+    post:
+      tags:
+      - Events
+      operationId: processOrderReturned
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReturnCreationResponseEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /payout/jumbocash/batch:
+    post:
+      tags:
+      - Payout
+      summary: Batch payout JumboCash for target schemes
+      description: Processes batch JumboCash payout for multiple target schemes
+      operationId: batchPayoutJumboCashForTargetScheme
+      requestBody:
+        description: Batch target scheme payout request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/BatchTargetSchemePayoutRequest'
+        required: true
+      responses:
+        '200':
+          description: Batch payout processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTargetSchemePayoutResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /payout/jumbocash:
+    post:
+      tags:
+      - Payout
+      summary: Payout JumboCash for target scheme
+      description: Processes JumboCash payout for a target scheme
+      operationId: payoutJumboCashForTargetScheme
+      requestBody:
+        description: Target scheme payout request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TargetSchemePayoutRequest'
+        required: true
+      responses:
+        '200':
+          description: Payout processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetSchemePayoutResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /target-scheme/backfill/tsPayoutStrategy/payoutOnTime:
+    post:
+      tags:
+      - Target Scheme
+      operationId: backFillTSPayoutOnTimeStrategy
+      parameters:
+      - name: time
+        in: query
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+                format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/create-scheme:
+    post:
+      tags:
+      - Target Scheme
+      summary: Create target scheme
+      description: Creates a new target scheme
+      operationId: createTargetScheme
+      requestBody:
+        description: Target scheme creation request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateTargetSchemeRequest'
+        required: true
+      responses:
+        '200':
+          description: Target scheme created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetSchemeBO'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /target-scheme/create-async:
+    post:
+      tags:
+      - Target Scheme
+      operationId: createTargetSchemeAsync
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateTargetSchemeAsyncRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/completed:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getCompletedSchemesForMember
+      parameters:
+      - name: memberId
+        in: query
+        schema:
+          type: string
+      - name: currentTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetsForSchemeMemberResponse'
+  /target-scheme/running:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getRunningSchemesForMember
+      parameters:
+      - name: memberId
+        in: query
+        schema:
+          type: string
+      - name: currentTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetsForSchemeMemberResponse'
+  /target-scheme/running-schemes:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getRunningTargetsSchemesForMember
+      parameters:
+      - name: memberId
+        in: query
+        schema:
+          type: string
+      - name: currentTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseMemberTargetSchemeResponse'
+  /target-scheme/smtId/{smtId}:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getSchemeMemberTargetDetails
+      parameters:
+      - name: smtId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseSchemeMemberTargetResponse'
+  /target-scheme/schemeId/{schemeId}/memberId/{memberId}:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getSchemeMemberTargetDetails_1
+      parameters:
+      - name: schemeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseSchemeMemberTargetResponse'
+  /target-scheme/smt-dump/{targetSchemeId}:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getSchemeMemberTargetDump
+      parameters:
+      - name: targetSchemeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/octet-stream: {}
+  /target-scheme/transactions:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getSchemeMemberTargetTransactions
+      parameters:
+      - name: smtId
+        in: query
+        schema:
+          type: string
+      - name: currentTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseSchemeMemberTransactionsResponse'
+  /target-scheme/dump:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getTargetSchemeDump
+      parameters:
+      - name: key
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /target-scheme/entities-list-schemes/{memberId}:
+    post:
+      tags:
+      - Target Scheme
+      operationId: getTargetSchemesForEntities
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TargetSchemesForEntitiesRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListSchemeMemberTargetResponse'
+  /target-scheme/product-schemes/{memberId}:
+    post:
+      tags:
+      - Target Scheme
+      operationId: getTargetSchemesForProduct
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TargetSchemeForProductRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListSchemeMemberTargetResponse'
+  /target-scheme/product-list-schemes/{memberId}:
+    post:
+      tags:
+      - Target Scheme
+      operationId: getTargetSchemesForProductList
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TargetSchemeForProductsRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetSchemeForProductsResponse'
+  /target-scheme/filtered:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getTargetsSchemesForMemberWithFilters
+      parameters:
+      - name: memberId
+        in: query
+        schema:
+          type: string
+      - name: startTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseMemberTargetSchemeResponse'
+  /target-scheme/range:
+    get:
+      tags:
+      - Target Scheme
+      operationId: getTargetsSchemesForMemberWithinRange
+      parameters:
+      - name: memberId
+        in: query
+        schema:
+          type: string
+      - name: startTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: endTime
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetsForSchemeMemberResponse'
+  /target-scheme/healthcheck:
+    get:
+      tags:
+      - Target Scheme
+      operationId: healthcheck
+      responses:
+        default:
+          description: default response
+          content:
+            text/html:
+              schema:
+                type: string
+  /target-scheme/mark-payout:
+    post:
+      tags:
+      - Target Scheme
+      operationId: markPayOutDone
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/MarkPayoutRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListString'
+  /target-scheme/soft-apply-cart:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processEvent
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CartDetails'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListSchemeMemberTargetResponse'
+  /target-scheme/event:
+    get:
+      tags:
+      - Target Scheme
+      operationId: processEvent_1
+      parameters:
+      - name: eventId
+        in: query
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetsForSchemeMemberResponse'
+  /target-scheme/order-cancelled:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processEvent_2
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/OrderItemMarkedCancelledEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/transactions/revert-replay:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processEvent_3
+      parameters:
+      - name: X_MERCURY_IDEMPOTENCY_KEY
+        in: header
+        schema:
+          type: string
+      - name: X_MERCURY_MESSAGE_ID
+        in: header
+        schema:
+          type: string
+      - name: X_MERCURY_GROUP_ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/RevertAndReplayTransactionRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/soft-apply-cart/v2:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processEventV2
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CartDetails'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListSchemeMemberTargetResponse'
+  /target-scheme/order-placed:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processMPOrderPlaced
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/MPOrderPlacedEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/order-returned:
+    post:
+      tags:
+      - Target Scheme
+      operationId: processOrderReturned_1
+      parameters:
+      - name: X-MERCURY-IDEMPOTENCY-KEY
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-MESSAGE-ID
+        in: header
+        schema:
+          type: string
+      - name: X-MERCURY-GROUP-ID
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReturnCreationResponseEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/refresh-cache:
+    get:
+      tags:
+      - Target Scheme
+      operationId: refreshCache
+      parameters:
+      - name: timestamp
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/soft-apply-bill:
+    post:
+      tags:
+      - Target Scheme
+      operationId: softApplyBill
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SoftApplyBillRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseListSchemeMemberTargetResponse'
+  /target-scheme/triggerPayouts:
+    post:
+      tags:
+      - Target Scheme
+      operationId: triggerTSPayoutsOnTimeBetween
+      parameters:
+      - name: payoutPeriodStartEpocMillis
+        in: query
+        schema:
+          type: integer
+          format: int64
+      - name: payoutPeriodEndEpocMillis
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseTargetSchemeIdsResponse'
+  /target-scheme/update-scheme:
+    put:
+      tags:
+      - Target Scheme
+      summary: Update target scheme
+      description: Updates an existing target scheme
+      operationId: updateTargetScheme
+      requestBody:
+        description: Target scheme update request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateTargetSchemeRequest'
+        required: true
+      responses:
+        '200':
+          description: Target scheme updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetSchemeBO'
+        '400':
+          description: Invalid request
+        '404':
+          description: Target scheme not found
+        '500':
+          description: Internal server error
+  /target-scheme/update-async:
+    put:
+      tags:
+      - Target Scheme
+      operationId: updateTargetSchemeAsync
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateTargetSchemeAsyncRequest'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+  /target-scheme/on-update-bg:
+    post:
+      tags:
+      - Target Scheme
+      operationId: updateTargetSchemeBusinessMapping
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/BusinessGroupUpdatedEvent'
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestResponseString'
+components:
+  schemas:
+    RestError:
+      type: object
+      properties:
+        error:
+          type: string
+    RestResponseString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: string
+        error:
+          $ref: '#/components/schemas/RestError'
+    AppliedGtmOfferInfoBO:
+      type: object
+      properties:
+        gtmOfferId:
+          type: string
+        gtmOfferSlabId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        gtmOfferDiscountPerUnit:
+          type: number
+    BasketOfferConstruct:
+      type: object
+      properties:
+        packagingType:
+          type: string
+          enum:
+          - SEPARATE
+          - INSIDE
+          - WRAPPED
+        offerPayout:
+          $ref: '#/components/schemas/OfferPayout'
+        offerCondition:
+          type: string
+          enum:
+          - SINGLE_ORDER
+          - SAME_ORDER_DATE
+          - SAME_DELIVERY_DATE
+          - SAME_ORDER_DATE_DURATION
+        offerThreshold:
+          $ref: '#/components/schemas/OfferThreshold'
+    BoltOrderItemBO:
+      type: object
+      properties:
+        listingId:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        boltOrderItemId:
+          type: string
+        boltOrderId:
+          type: string
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        mrp:
+          type: number
+        vat:
+          type: number
+          format: double
+        cessPercentage:
+          type: number
+          format: double
+        sintaxPercentage:
+          type: number
+          format: double
+        hsnCode:
+          type: string
+        gstPercentage:
+          type: number
+          format: double
+        gstComponentShare:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        sellingPrice:
+          type: number
+        orderItemAmount:
+          type: number
+        shippingCharges:
+          type: number
+        unitStatusCounter:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        orderItemStatus:
+          type: string
+        orderItemStatusRemark:
+          type: string
+        invoiceNumbers:
+          type: array
+          items:
+            type: string
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Offer'
+        jtOfferBOs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBO'
+        appliedJtOfferIds:
+          type: array
+          items:
+            type: string
+        boltOrderType:
+          type: string
+          enum:
+          - JIT
+          - REPLENISH
+          - MARKETPLACE
+          - INSTITUTIONAL
+          - J24
+        orderPlacedTimestamp:
+          type: integer
+          format: int64
+        invoicedQuantity:
+          type: integer
+          format: int32
+        tradeOffer:
+          $ref: '#/components/schemas/OfferBO'
+        cartItemID:
+          type: string
+        rtsTime:
+          type: integer
+          format: int64
+        invoiceItemIdToQtyMap:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        jpin:
+          type: string
+        promiseTime:
+          type: integer
+          format: int64
+        promiseString:
+          type: string
+        mpCommissionBO:
+          $ref: '#/components/schemas/MpCommissionBO'
+        rmcTaxPercentage:
+          type: number
+        statusUpdateHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/BoltOrderItemRevisionBO'
+        orderOnlyMultiplesOfMoq:
+          type: boolean
+        minOrderQty:
+          type: integer
+          format: int32
+        returnsOnlyMutliplesOfMoq:
+          type: boolean
+        requestOrigin:
+          type: string
+          enum:
+          - CUSTOMER_APP
+          - GO_TO_MARKET
+          - J24
+          - INSTITUTIONAL_SALE
+          - DEXTER
+          - INGESTION
+          - BHARATPE
+          - GOLDEN_EYE_POS
+          - CHETAK
+        appliedGtmOfferInfoBOList:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/AppliedGtmOfferInfoBO'
+        isFreebie:
+          type: boolean
+        relatedOrderItemIds:
+          type: array
+          items:
+            type: string
+        creditParametersBO:
+          $ref: '#/components/schemas/CreditParametersBO'
+        boltOrderDistributionChannelType:
+          type: string
+        boltOrderDistributionChannelId:
+          type: string
+    BoltOrderItemRevisionBO:
+      type: object
+      properties:
+        orderItemId:
+          type: string
+        status:
+          type: string
+        reasonCode:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        lastUpdatedUser:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        statusRemark:
+          type: string
+        reasonCodes:
+          type: array
+          items:
+            type: string
+    CreditParametersBO:
+      type: object
+      properties:
+        jpin:
+          type: string
+        interestRate:
+          type: number
+        subsidizedDays:
+          type: integer
+          format: int64
+        convenienceFeeRate:
+          type: number
+        convenienceFeeTaxPercentage:
+          type: number
+        isCreditOfferApplied:
+          type: boolean
+    EntityDisplayData:
+      type: object
+      properties:
+        displayBackgroundImage:
+          type: string
+        displayLogo:
+          type: string
+        displayTitle:
+          type: string
+        displaySubtext:
+          type: string
+        description:
+          type: string
+        label:
+          type: string
+        entityID:
+          type: string
+    JTOfferBO:
+      type: object
+      properties:
+        jtOfferId:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - EXPIRED
+        startTime:
+          type: integer
+          format: int64
+        endTime:
+          type: integer
+          format: int64
+        jtOfferDefinitionId:
+          type: string
+        jtOfferType:
+          type: string
+          enum:
+          - VOLUME
+          - BASKET
+          - ASSORTMENT
+          - USERACTIVITY
+          - PRICECUT
+          - FREESHIPPING
+          - ENTITY
+          - FREEBIE
+          - CREDIT
+        jtOfferTypeString:
+          type: string
+        customerTargetGroupId:
+          type: string
+        segmentId:
+          type: string
+        bzids:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        listingTargetGroupId:
+          type: string
+        exclusionListingEntityId:
+          type: string
+        exclusionListingEntityType:
+          type: string
+          enum:
+          - LISTING_TARGET_GROUP
+          - LISTING_ID
+        mutuallyExclusive:
+          type: string
+          enum:
+          - SAME_CUSTOMER_TARGET_GROUP
+          - NONE
+        displayData:
+          $ref: '#/components/schemas/EntityDisplayData'
+        listings:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        jtOfferCondition:
+          $ref: '#/components/schemas/JTOfferConditionBO'
+        jtOfferPayout:
+          $ref: '#/components/schemas/JTOfferPayoutBO'
+        jtOfferBurnThresholdBOs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBurnThresholdBO'
+        priorityScore:
+          type: integer
+          format: int32
+        nearExpiry:
+          type: boolean
+        offerRequestor:
+          type: string
+        offerOwner:
+          type: string
+        minAmountToAvailOffer:
+          type: number
+        jtOfferIssuer:
+          type: string
+        initiatorType:
+          type: string
+        initiatorId:
+          type: string
+        tenantId:
+          type: string
+        perBusinessMaxAvailLimit:
+          type: integer
+          format: int64
+        jpinJTOfferPayoutMapForComboProductOffers:
+          type: object
+          additionalProperties:
+            type: number
+        purposeType:
+          type: string
+        purposeReferenceId:
+          type: string
+        autoApplyOffer:
+          type: boolean
+    JTOfferBurnThresholdBO:
+      type: object
+      properties:
+        jtOfferBurnThresholdType:
+          type: string
+          enum:
+          - DISCOUNTED_AMOUNT_BURN
+          - DISCOUNTED_QUANTITY_BURN
+          - DISCOUNTED_QUANTITY_BURN_PER_CUSTOMER
+        maxBurnThreshold:
+          type: number
+    JTOfferConditionBO:
+      type: object
+      properties:
+        offerConditionType:
+          type: string
+          enum:
+          - LISTING_VOLUME_OFFER
+          - APP_UPGRADE
+          - ENTITY
+          - CART_ITEM
+          - NONE
+        offerConditionTypeStr:
+          type: string
+        threshold:
+          type: integer
+          format: int64
+        thresholdQuantity:
+          type: integer
+          format: int32
+        thresholdAmount:
+          type: number
+        offerThresholdType:
+          type: string
+          enum:
+          - AMOUNT
+          - QUANTITY
+        inclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        inclusionEntityIds:
+          type: array
+          items:
+            type: string
+        exclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        exclusionEntityIds:
+          type: array
+          items:
+            type: string
+    JTOfferPayoutBO:
+      type: object
+      properties:
+        offerPayoutType:
+          type: string
+          enum:
+          - PER_UNIT_ABSOLUTE_PRICE
+          - PER_UNIT_PERCENTAGE_DISCOUNT
+          - PER_UNIT_CASH_DISCOUNT
+          - CASH_DISCOUNT
+          - SHIPPING_DISCOUNT
+          - FLAT_SHIPPING
+          - FREEBIE
+          - ADDITIONAL_VOLUME_PERCENT
+          - OFFER
+          - PRICE_CUT
+          - FLAT_DISCOUNT
+          - JUMBOCASH
+          - DIFFERENTIAL_CREDIT
+          - SHIPPING_CHARGE_CASHBACK
+        offerPayoutTypeStr:
+          type: string
+        payout:
+          type: number
+        payoutDisplayString:
+          type: string
+        listingIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        listingGroup:
+          type: string
+        mainJpinQty:
+          type: integer
+          format: int64
+        applyMultipleTimesAllowed:
+          type: boolean
+        freebieJpin:
+          type: string
+        freebieQuantity:
+          type: integer
+          format: int64
+        freebieTitle:
+          type: string
+        interestRate:
+          type: number
+        subsidizedDays:
+          type: integer
+          format: int64
+        convenienceFeeRate:
+          type: number
+        convenienceFeeTaxPercentage:
+          type: number
+        tenure:
+          type: integer
+          format: int32
+        shippingChargeCashbackValue:
+          type: number
+        shippingChargeCashbackType:
+          type: string
+          enum:
+          - PERCENTAGE
+          - CASH
+        payoutDiscountType:
+          type: string
+          enum:
+          - PERCENTAGE
+          - CASH
+    ManufacturerOfferConstruct:
+      type: object
+      properties:
+        packagingType:
+          type: string
+          enum:
+          - SEPARATE
+          - INSIDE
+          - WRAPPED
+        offerPayout:
+          $ref: '#/components/schemas/OfferPayout'
+        offerThreshold:
+          type: integer
+          format: int32
+    MpCommissionBO:
+      type: object
+      properties:
+        entityId:
+          type: string
+        entityType:
+          type: string
+          enum:
+          - SELLER_PRODUCT
+          - PRODUCT_VERTICAL
+          - SELLER
+          - DEFAULT
+        mpCommissionType:
+          type: string
+          enum:
+          - PERCENTAGE
+          - FLAT
+        value:
+          type: number
+    Offer:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        creationRequestID:
+          type: string
+        requestId:
+          type: string
+        lastUpdatedTime:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        lastUpdatedBy:
+          type: string
+        siteId:
+          type: string
+        tenantId:
+          type: string
+        marketplaceId:
+          type: string
+        deletedAt:
+          type: integer
+          format: int64
+        deletionRemark:
+          type: string
+        expiryTimeInSeconds:
+          type: integer
+          format: int64
+        offerID:
+          type: string
+        status:
+          type: string
+        active:
+          type: boolean
+        offerTitle:
+          type: string
+        offerSubtitle:
+          type: string
+        offerDescription:
+          type: string
+        internalOfferDescription:
+          type: string
+        offerDuration:
+          $ref: '#/components/schemas/OfferDuration'
+        offerImageUrl:
+          type: string
+        imagePosition:
+          type: integer
+          format: int32
+        offerConstructType:
+          type: string
+          enum:
+          - VOLUME_OFFER
+          - BASKET_OFFER
+          - MANUFACTURER_OFFER
+        basketOfferConstruct:
+          $ref: '#/components/schemas/BasketOfferConstruct'
+        volumeOfferConstruct:
+          $ref: '#/components/schemas/VolumeOfferConstruct'
+        manufacturerOfferConstruct:
+          $ref: '#/components/schemas/ManufacturerOfferConstruct'
+        lotIDList:
+          type: array
+          items:
+            type: string
+        listingGroupId:
+          type: string
+          writeOnly: true
+        listingIDList:
+          type: array
+          items:
+            type: string
+        merchRefId:
+          type: string
+    OfferBO:
+      type: object
+      properties:
+        offerId:
+          type: string
+        offerTypeString:
+          type: string
+        active:
+          type: boolean
+        discountDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferDiscountDetailsBO'
+        offerType:
+          type: string
+          enum:
+          - Absolute Price
+          - Percentage Discount
+          - Cash Discount
+    OfferDiscountDetailsBO:
+      type: object
+      properties:
+        volumeThreshold:
+          type: integer
+          format: int32
+        offer:
+          type: number
+        computedOfferPrice:
+          type: number
+          writeOnly: true
+    OfferDuration:
+      type: object
+      properties:
+        startDate:
+          type: integer
+          format: int64
+        endDate:
+          type: integer
+          format: int64
+    OfferPayout:
+      type: object
+      properties:
+        offerPayoutTypeObjectMap:
+          type: object
+          additionalProperties:
+            type: object
+    OfferThreshold:
+      type: object
+      properties:
+        offerThresholdMap:
+          type: object
+          additionalProperties:
+            type: object
+    OrderItemMarkedCancelledEvent:
+      type: object
+      properties:
+        boltOrderItemBO:
+          $ref: '#/components/schemas/BoltOrderItemBO'
+        qtyCancelled:
+          type: integer
+          format: int32
+        cancellationTime:
+          type: integer
+          format: int64
+        eventId:
+          type: string
+        entityId:
+          type: string
+        idempotencyKey:
+          type: string
+        timestampPublished:
+          type: integer
+          format: int64
+        timestampReceived:
+          type: integer
+          format: int64
+        attemptNumber:
+          type: integer
+          format: int32
+        topic:
+          type: string
+        partition:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int64
+    VolumeOfferConstruct:
+      type: object
+      properties:
+        packagingType:
+          type: string
+          enum:
+          - SEPARATE
+          - INSIDE
+          - WRAPPED
+        offerPayout:
+          $ref: '#/components/schemas/OfferPayout'
+        offerThreshold:
+          type: integer
+          format: int32
+        offerCondition:
+          type: string
+          enum:
+          - SINGLE_ORDER
+          - SAME_ORDER_DATE
+          - SAME_DELIVERY_DATE
+          - SAME_ORDER_DATE_DURATION
+    BoltOrderBO:
+      type: object
+      properties:
+        boltOrderId:
+          type: string
+        buyerId:
+          type: string
+        orderAmount:
+          type: number
+        shippingAmount:
+          type: number
+        orderStatus:
+          type: string
+        orderStatusRemark:
+          type: string
+        boltOrderType:
+          type: string
+          enum:
+          - JIT
+          - REPLENISH
+          - MARKETPLACE
+          - INSTITUTIONAL
+          - J24
+        orderPlacedTimestamp:
+          type: integer
+          format: int64
+        addressId:
+          type: string
+        deliveryNotes:
+          type: string
+        boltOrderItemBOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BoltOrderItemBO'
+        cartID:
+          type: string
+        requestOrigin:
+          type: string
+          enum:
+          - CUSTOMER_APP
+          - GO_TO_MARKET
+          - J24
+          - INSTITUTIONAL_SALE
+          - DEXTER
+          - INGESTION
+          - BHARATPE
+          - GOLDEN_EYE_POS
+          - CHETAK
+    BoltOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        orderItemIds:
+          type: array
+          items:
+            type: string
+        boltOrderBO:
+          $ref: '#/components/schemas/BoltOrderBO'
+    MPOrderPlacedEvent:
+      type: object
+      properties:
+        boltOrderResponse:
+          $ref: '#/components/schemas/BoltOrderResponse'
+        eventId:
+          type: string
+        entityId:
+          type: string
+        idempotencyKey:
+          type: string
+        timestampPublished:
+          type: integer
+          format: int64
+        timestampReceived:
+          type: integer
+          format: int64
+        attemptNumber:
+          type: integer
+          format: int32
+        topic:
+          type: string
+        partition:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int64
+    PostDeliveryDetails:
+      type: object
+      properties:
+        usedUnits:
+          type: integer
+          format: int32
+        openedUnits:
+          type: integer
+          format: int32
+        totalUsedWeight:
+          type: number
+          format: double
+        replacement:
+          type: boolean
+        replacementBO:
+          $ref: '#/components/schemas/ReplacementBO'
+        itemPickedup:
+          type: boolean
+        refundBO:
+          $ref: '#/components/schemas/RefundBO'
+        promisedRefund:
+          type: number
+        unitOfWeight:
+          type: string
+          enum:
+          - KILOGRAM
+          - GRAM
+    RefundBO:
+      type: object
+      properties:
+        refundId:
+          type: string
+        refundMode:
+          type: string
+          enum:
+          - CASH
+          - CREDIT_CARD
+          - DEBIT_CARD
+          - CHEQUE
+        settlementType:
+          type: string
+          enum:
+          - FULL_REFUND
+          - PARTIAL_REFUND
+        refundAmount:
+          type: number
+    ReplacementBO:
+      type: object
+      properties:
+        listingId:
+          type: string
+        sellingPrice:
+          type: number
+        quantity:
+          type: integer
+          format: int32
+        replacementOrderItem:
+          $ref: '#/components/schemas/BoltOrderItemBO'
+    ReturnCreationResponseEvent:
+      type: object
+      properties:
+        eventId:
+          type: string
+        entityId:
+          type: string
+        idempotencyKey:
+          type: string
+        timestampPublished:
+          type: integer
+          format: int64
+        timestampReceived:
+          type: integer
+          format: int64
+        attemptNumber:
+          type: integer
+          format: int32
+        topic:
+          type: string
+        partition:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int64
+        returnItemBO:
+          $ref: '#/components/schemas/ReturnItemBO'
+    ReturnItemBO:
+      type: object
+      properties:
+        returnItemId:
+          type: string
+        orderItemId:
+          type: string
+        returnItemUnits:
+          type: integer
+          format: int32
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        rto:
+          type: boolean
+        returnReqId:
+          type: string
+        postDeliveryDetails:
+          $ref: '#/components/schemas/PostDeliveryDetails'
+        jpinWrongProduct:
+          type: string
+        promiseId:
+          type: string
+        returnState:
+          type: string
+          enum:
+          - REQUESTED
+          - APPROVED
+          - REJECTED
+          - INPROGRESS
+          - SHIPPED
+          - CANCELLED
+          - DELIVERED
+          - COMPLETED
+        imageUrlList:
+          type: array
+          items:
+            type: string
+        reasonCode:
+          type: string
+          enum:
+          - ITEM_UNSELLABLE
+          - WRONG_PRODUCT_DELIVERED
+          - FREEBIE_MISSING
+          - ITEM_BEYOND_EXPIRY
+          - ITEM_INFESTED
+          - WEIGHT_ISSUE
+          - MRP_MISMATCH
+          - LOWER_PRICE_AVAILABLE_ELSEWHERE
+          - PRODUCT_IS_WET_SOGGY_OR_DRY
+          - UNUSUAL_PRODUCT_COLOR
+          - UNUSUAL_PRODUCT_SIZE
+          - UNUSUAL_PRODUCT_TEXTURE
+          - COOKED_PRODUCT_NOT_GOOD
+          - FOREIGN_MATERIAL_IN_PRODUCT
+          - WRONG_PRODUCT_ORDERED
+          - PACKAGING_IS_DIRTY
+          - PRODUCT_DAMAGED
+          - FREEBIE_NOT_DELIVERED
+          - NON_FREEBIE_DELIEVRED
+          - MANUFACTURER_OR_SELLER_RECALL
+          - ITEM_NOT_NEEDED
+          - UNUSUAL_PRODUCT_COLOR_SIZE_OR_TEXTURE
+          - ITEM_LOW_SHELF_LIFE
+          - EXPECTATION_NOT_MET
+          - CUSTOMER_CHANGED_MIND
+          - CUSTOMER_ORDERED_BY_MISTAKE
+          - ITEM_DELAYED
+          - ITEM_NOT_FOUND
+          - CASH_NOT_AVAILABLE
+          - ITEM_NOT_AS_DESCRIBED
+          - CUSTOMER_NOT_SERVICEABLE
+          - CUSTOMER_NOT_AVAILABLE
+          - ADDRESS_NOT_FOUND
+          - DAMAGED_IN_TRANSIT
+          - DUPLICATE_ORDER
+          - PURCHASED_FROM_OTHER_SOURCE
+          - ACCOUNT_ON_HOLD
+          - CHANGE_IN_QUANTITY
+          - ITEM_WITH_KNOWN_ISSUE
+          - PRODUCT_PRICE_ISSUE
+          - MANUFACTURER_RECALL
+          - SELLER_RECALL
+          - ITEM_DAMAGED
+        comments:
+          type: string
+        listingId:
+          type: string
+        inwardedQty:
+          type: integer
+          format: int32
+        receivedQty:
+          type: integer
+          format: int32
+        returnCreatedTime:
+          type: integer
+          format: int64
+    BatchTargetSchemePayoutResponse:
+      type: object
+      properties:
+        targetSchemePayoutResponses:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetSchemePayoutResponse'
+    TargetSchemePayoutResponse:
+      type: object
+      properties:
+        targetSchemePayoutTransactionBO:
+          $ref: '#/components/schemas/TargetSchemePayoutTransactionBO'
+        message:
+          type: string
+    TargetSchemePayoutTransactionBO:
+      type: object
+      properties:
+        targetSchemePayoutTransactionId:
+          type: integer
+          format: int64
+        schemeMemberTargetId:
+          type: integer
+          format: int64
+        status:
+          type: string
+        payoutReferenceId:
+          type: string
+        payoutId:
+          type: integer
+          format: int64
+        payoutDoneValue:
+          type: integer
+          format: int64
+        memberId:
+          type: string
+        achievedMileStoneId:
+          type: integer
+          format: int64
+    RestResponseBatchTargetSchemePayoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/BatchTargetSchemePayoutResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    BatchTargetSchemePayoutRequest:
+      required:
+      - targetSchemePayoutRequests
+      type: object
+      properties:
+        targetSchemePayoutRequests:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetSchemePayoutRequest'
+    TargetSchemePayoutRequest:
+      required:
+      - achievedMileStoneId
+      - idempotencyKey
+      - memberId
+      - payoutDisplayMessage
+      - payoutId
+      - payoutMode
+      - payoutValue
+      - schemeMemberTargetId
+      - schemeSponsor
+      type: object
+      properties:
+        schemeMemberTargetId:
+          type: integer
+          format: int64
+        payoutValue:
+          type: integer
+          format: int64
+        payoutDisplayMessage:
+          type: string
+        achievedMileStoneId:
+          type: integer
+          format: int64
+        payoutMode:
+          type: string
+        schemeSponsor:
+          type: string
+        memberId:
+          type: string
+        payoutId:
+          type: integer
+          format: int64
+        idempotencyKey:
+          type: string
+    RestResponseTargetSchemePayoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/TargetSchemePayoutResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    AchievedMilestoneBO:
+      type: object
+      properties:
+        achievedMilestoneId:
+          type: string
+        status:
+          type: string
+        achievedAtValue:
+          type: number
+        achievedOnTime:
+          type: integer
+          format: int64
+        payoutDoneValue:
+          type: number
+        payoutType:
+          type: string
+        payoutId:
+          type: string
+        payoutReferenceId:
+          type: string
+    ContributionCapBO:
+      type: object
+      properties:
+        id:
+          type: string
+        contributionCapType:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+        entityName:
+          type: string
+        capValue:
+          type: number
+        capValueType:
+          type: string
+        schemeMemberCapId:
+          type: string
+        currentValue:
+          type: number
+        capReachedTime:
+          type: integer
+          format: int64
+        lastTransactionAppliedValue:
+          type: number
+    EntityId:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ruleId:
+          type: string
+    GroupInclusionRuleBO:
+      type: object
+      properties:
+        entityType:
+          type: string
+        includedEntries:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityId'
+        excludedEntries:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityId'
+    MilestoneBO:
+      type: object
+      properties:
+        milestoneId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        atValue:
+          type: number
+        payoutBOs:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/PayoutBO'
+        achievedMilestoneBO:
+          $ref: '#/components/schemas/AchievedMilestoneBO'
+    PayoutBO:
+      type: object
+      properties:
+        payoutId:
+          type: string
+        payoutMode:
+          type: string
+        payoutType:
+          type: string
+        value:
+          type: number
+    TargetSchemeBO:
+      type: object
+      properties:
+        targetSchemeId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        targetSchemeType:
+          type: string
+        owner:
+          type: string
+        objective:
+          type: string
+        startTime:
+          type: integer
+          format: int64
+        endTime:
+          type: integer
+          format: int64
+        campaignId:
+          type: string
+        status:
+          type: string
+        milestoneBOs:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/MilestoneBO'
+        schemeMemberRules:
+          $ref: '#/components/schemas/GroupInclusionRuleBO'
+        schemeItemRules:
+          $ref: '#/components/schemas/GroupInclusionRuleBO'
+        contributionCapBOs:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionCapBO'
+        internalName:
+          type: string
+        internalDescription:
+          type: string
+        recommendationTemplate:
+          type: string
+        rank:
+          type: number
+          format: double
+        bzidGrpId:
+          type: string
+        payoutStrategyType:
+          type: string
+          enum:
+          - PAYOUT_ON_TIME
+        payoutDisplayMessage:
+          type: string
+        payoutTime:
+          type: integer
+          format: int64
+        purposeType:
+          type: string
+        purposeReferenceId:
+          type: string
+    RestResponseTargetSchemeBO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/TargetSchemeBO'
+        error:
+          $ref: '#/components/schemas/RestError'
+    ContributionCapRequest:
+      type: object
+      properties:
+        contributionCapId:
+          type: string
+        contributionCapValue:
+          type: number
+    CreateTargetSchemeRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        internalName:
+          type: string
+        internalDescription:
+          type: string
+        objective:
+          type: string
+        owner:
+          type: string
+        bzidGrpId:
+          type: string
+        inclusingCatalogId:
+          type: string
+        excludingCatalogId:
+          type: string
+        catalogText:
+          type: string
+        campaignId:
+          type: string
+        startTime:
+          type: integer
+          format: int64
+        endTime:
+          type: integer
+          format: int64
+        recommendationTemplate:
+          type: string
+        rank:
+          type: number
+          format: double
+        milestoneRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/MilestoneRequest'
+        contributionCapRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionCapRequest'
+        payoutStrategyType:
+          type: string
+          enum:
+          - PAYOUT_ON_TIME
+        payoutDisplayMessage:
+          type: string
+        payoutTime:
+          type: integer
+          format: int64
+        purposeType:
+          type: string
+          enum:
+          - MEMBERSHIP_BENEFIT
+          - SCRATCHCARD_REWARD
+        purposeReferenceId:
+          type: string
+    MilestoneRequest:
+      type: object
+      properties:
+        milestoneValue:
+          type: number
+        payoutDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/PayoutDetails'
+    PayoutDetails:
+      type: object
+      properties:
+        payoutValue:
+          type: number
+        payoutMode:
+          type: string
+        payoutType:
+          type: string
+    CreateTargetSchemeAsyncRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        rowId:
+          type: string
+        rowExecutionId:
+          type: string
+        createTargetSchemeRequest:
+          $ref: '#/components/schemas/CreateTargetSchemeRequest'
+    DisplayDataResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        description:
+          type: string
+        footerLabel:
+          type: string
+        params:
+          type: string
+        nextPageType:
+          type: string
+        deepLinkUrl:
+          type: string
+        payoutModeString:
+          type: string
+        payoutModeIcon:
+          type: string
+        milestoneSubtext:
+          type: string
+    RestResponseTargetsForSchemeMemberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/TargetsForSchemeMemberResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    SchemeMemberTargetBO:
+      type: object
+      properties:
+        schemeMemberTargetId:
+          type: string
+        memberId:
+          type: string
+        currentValue:
+          type: number
+        lastTransactionAppliedValue:
+          type: number
+        targetSchemeBO:
+          $ref: '#/components/schemas/TargetSchemeBO'
+    SchemeMemberTargetResponse:
+      type: object
+      properties:
+        schemeMemberTargetBO:
+          $ref: '#/components/schemas/SchemeMemberTargetBO'
+        displayData:
+          $ref: '#/components/schemas/DisplayDataResponse'
+    TargetsForSchemeMemberResponse:
+      type: object
+      properties:
+        memberId:
+          type: string
+        schemeMemberTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMemberTargetResponse'
+    MemberTargetSchemeBO:
+      type: object
+      properties:
+        targetSchemeId:
+          type: string
+        currentValue:
+          type: number
+        totalJCEarnedInTargetScheme:
+          type: number
+        startTime:
+          type: integer
+          format: int64
+        endTime:
+          type: integer
+          format: int64
+        targetSchemeBO:
+          $ref: '#/components/schemas/TargetSchemeBO'
+    MemberTargetSchemeResponse:
+      type: object
+      properties:
+        businessId:
+          type: string
+        memberTargetSchemeBOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberTargetSchemeBO'
+    RestResponseMemberTargetSchemeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/MemberTargetSchemeResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    RestResponseSchemeMemberTargetResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/SchemeMemberTargetResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    DailyTransactionResponse:
+      type: object
+      properties:
+        labelString:
+          type: string
+        date:
+          type: integer
+          format: int64
+        transactionType:
+          type: string
+        value:
+          type: number
+    RestResponseSchemeMemberTransactionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/SchemeMemberTransactionsResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    SchemeMemberTransactionsResponse:
+      type: object
+      properties:
+        schemeMemberTargetId:
+          type: string
+        dailyTransactionResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyTransactionResponse'
+    RestResponseListSchemeMemberTargetResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMemberTargetResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    TargetSchemesForEntitiesRequest:
+      type: object
+      properties:
+        jpins:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        brandIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        manufacturerIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        pvIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        categoryIds:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    TargetSchemeForProductRequest:
+      type: object
+      properties:
+        jpin:
+          type: string
+        brandId:
+          type: string
+        manufacturerId:
+          type: string
+        pvId:
+          type: string
+        categoryIdList:
+          type: array
+          items:
+            type: string
+    RestResponseTargetSchemeForProductsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/TargetSchemeForProductsResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    TargetSchemeForProductsResponse:
+      type: object
+      properties:
+        targetSchemesForJpin:
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetSchemesForJpin'
+    TargetSchemesForJpin:
+      type: object
+      properties:
+        jpin:
+          type: string
+        schemeMemberTargetResponses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemeMemberTargetResponse'
+    TargetSchemeForProductsRequest:
+      type: object
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetSchemeForProductRequest'
+    RestResponseListString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            type: string
+        error:
+          $ref: '#/components/schemas/RestError'
+    MarkPayoutRequest:
+      type: object
+      properties:
+        targetSchemeId:
+          type: integer
+          format: int64
+        memberId:
+          type: string
+        payoutValue:
+          type: number
+    AckMessage:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+        title:
+          type: string
+    CartDetails:
+      type: object
+      properties:
+        cartID:
+          type: string
+        customerID:
+          type: string
+        cartAmount:
+          type: number
+        originalDeliverySubtotal:
+          type: number
+        originalPayableAmount:
+          type: number
+        deliverySubtotal:
+          type: number
+        totalPayableAmount:
+          type: number
+        activeCartItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItemDetails'
+        ackMessage:
+          $ref: '#/components/schemas/AckMessage'
+        rewardList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartReward'
+        appliedCartOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBO'
+        applicableCartOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferRecommendationResponse'
+        deliveryNotes:
+          type: string
+    CartItemDetails:
+      type: object
+      properties:
+        cartItemID:
+          type: string
+        cartID:
+          type: string
+        cartItemCreatedTime:
+          type: integer
+          format: int64
+        title:
+          type: string
+        selectedQuantity:
+          type: integer
+          format: int64
+        finalPricePerUnit:
+          type: number
+        promiseTime:
+          type: integer
+          format: int64
+        listingDetails:
+          $ref: '#/components/schemas/ListingDetails'
+        productDetails:
+          $ref: '#/components/schemas/ProductDetailsCart'
+        originalDeliveryCharges:
+          type: number
+        deliveryCharges:
+          type: number
+        cartItemDiscount:
+          type: number
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBO'
+        cartReferenceDetails:
+          $ref: '#/components/schemas/CartReferenceDetails'
+        freebieQuantity:
+          type: integer
+          format: int64
+        ackMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/AckMessage'
+        status:
+          type: string
+        isComboProduct:
+          type: boolean
+        referenceSelectedQuantity:
+          type: integer
+          format: int64
+        referenceFinalPricePerUnit:
+          type: number
+        jpin:
+          type: string
+        pvId:
+          type: string
+        brandId:
+          type: string
+        manufacturerId:
+          type: string
+    CartReferenceDetails:
+      type: object
+      properties:
+        referenceSelectedQuantity:
+          type: integer
+          format: int64
+        referenceFinalPricePerUnit:
+          type: number
+        referencePromiseTime:
+          type: integer
+          format: int64
+    CartReward:
+      type: object
+      properties:
+        displayLabel:
+          type: string
+        value:
+          type: number
+        type:
+          type: string
+    CaseDetails:
+      type: object
+      properties:
+        caseSizeLabel:
+          type: string
+        caseSizeValue:
+          type: string
+        showCaseSize:
+          type: boolean
+    CreditOfferBo:
+      type: object
+      properties:
+        offerDisplayText:
+          type: string
+    JTOfferRecommendationResponse:
+      type: object
+      properties:
+        jtOfferBO:
+          $ref: '#/components/schemas/JTOfferBO'
+        inclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        inclusionEntityIds:
+          type: array
+          items:
+            type: string
+        exclusionEntityType:
+          type: string
+          enum:
+          - CART
+          - JPIN
+          - PRODUCT_VERTICAL
+          - BRAND
+          - CATEGORY
+          - MANUFACTURER
+        exclusionEntityIds:
+          type: array
+          items:
+            type: string
+        minAmountToAvailOffer:
+          type: number
+        recommendationDisplayString:
+          type: string
+    ListingDetails:
+      type: object
+      properties:
+        listingId:
+          type: string
+        spId:
+          type: string
+        jpin:
+          type: string
+        sellingPrice:
+          type: number
+        sellerId:
+          type: string
+        sellerName:
+          type: string
+        minOrderQuantity:
+          type: integer
+          format: int32
+        maxOrderQuantity:
+          type: integer
+          format: int32
+        mrp:
+          type: number
+        channelId:
+          type: string
+        availableQuantity:
+          type: integer
+          format: int32
+        tradeOffer:
+          $ref: '#/components/schemas/OfferBO'
+        jtOfferBOList:
+          type: array
+          items:
+            $ref: '#/components/schemas/JTOfferBO'
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - ONBOARDING
+          - ONHOLD
+        minOrderQuantityMultiples:
+          type: boolean
+        qtyPromiseDetailsMap:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PromiseDetails'
+        winningListingsForComboProductJpins:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ListingDetails'
+        freebieListingDetails:
+          $ref: '#/components/schemas/ListingDetails'
+        creditOfferBo:
+          $ref: '#/components/schemas/CreditOfferBo'
+        caseSize:
+          type: integer
+          format: int32
+    ProductDetailsCart:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        brand:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailsResponseImageUrlsItem'
+        ean:
+          type: string
+        active:
+          type: boolean
+        hasTradeOffers:
+          type: boolean
+        description:
+          type: string
+        catalogRevisionId:
+          type: number
+        layout:
+          type: string
+          enum:
+          - OLD
+          - PERUNIT
+          - MARGINS
+        netQuantityMeasuringUnit:
+          type: string
+        netQuantity:
+          type: number
+        packagingType:
+          type: string
+        comboProductInfoList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInfo'
+        pvId:
+          type: string
+        brandId:
+          type: string
+        categoryIds:
+          type: array
+          items:
+            type: string
+        manufacturerId:
+          type: string
+        caseDetails:
+          $ref: '#/components/schemas/CaseDetails'
+    ProductDetailsResponseImageUrlsItem:
+      type: object
+      properties:
+        fullImage:
+          type: string
+        thumbnail:
+          type: string
+    ProductInfo:
+      type: object
+      properties:
+        jpin:
+          type: string
+        title:
+          type: string
+        qty:
+          type: integer
+          format: int32
+    PromiseDetails:
+      type: object
+      properties:
+        promiseTime:
+          type: integer
+          format: int64
+        deliveryPromiseMessage:
+          type: string
+        cutOffTimeMessage:
+          type: string
+        thresholdCrossAlertTitle:
+          type: string
+        thresholdCrossAlert:
+          type: string
+        cutOffTime:
+          type: integer
+          format: int64
+    RevertAndReplayTransactionRequest:
+      type: object
+      properties:
+        ledgerEntryId:
+          type: integer
+          format: int64
+        ledgerEntryEntityId:
+          type: string
+        contributionCapRuleId:
+          type: string
+    BillDetailsBO:
+      type: object
+      properties:
+        customerId:
+          type: string
+        customerBusinessId:
+          type: string
+        billAmount:
+          type: number
+        billOrderItemItemDetailsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillOrderItemItemDetails'
+    BillOrderItemItemDetails:
+      type: object
+      properties:
+        listingId:
+          type: string
+        jpin:
+          type: string
+        orderItemAmount:
+          type: number
+        sellerId:
+          type: string
+    SoftApplyBillRequest:
+      type: object
+      properties:
+        billDetailsBO:
+          $ref: '#/components/schemas/BillDetailsBO'
+    RestResponseTargetSchemeIdsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+          format: int32
+        data:
+          $ref: '#/components/schemas/TargetSchemeIdsResponse'
+        error:
+          $ref: '#/components/schemas/RestError'
+    TargetSchemeIdsResponse:
+      type: object
+      properties:
+        targetSchemeIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        pushedEventsAchievedMilestoneIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        failedToPushEventsAchievedMilestoneIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+    UpdateTargetSchemeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        campaignId:
+          type: string
+        recommendationTemplate:
+          type: string
+        rank:
+          type: number
+          format: double
+        bzidGrpId:
+          type: string
+    UpdateTargetSchemeAsyncRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        rowId:
+          type: string
+        rowExecutionId:
+          type: string
+        updateTargetSchemeRequest:
+          $ref: '#/components/schemas/UpdateTargetSchemeRequest'
+    BusinessGroupUpdatedEvent:
+      type: object
+      properties:
+        bzidsActivated:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        bzidsDeactivated:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        bzidGrpId:
+          type: string
