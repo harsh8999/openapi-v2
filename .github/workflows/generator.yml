@@ -1,0 +1,200 @@
+# ============================================================================
+# GitHub Actions Workflow: Generate & Publish Java SDKs
+#
+# Directory Convention:
+# services/{service-name}/{service-name}-openapi.yaml
+#
+# Responsibilities:
+# - Detect changed OpenAPI specs
+# - Generate Java SDKs (8 / 17 / 21)
+# - Apply post-generation fixes (shell scripts)
+# - Publish artifacts to GitHub Packages
+# ============================================================================
+
+name: Generate & Publish Java SDKs
+
+# ----------------------------------------------------------------------------
+# Trigger conditions
+# ----------------------------------------------------------------------------
+on:
+  # Run automatically on every push to main
+  push:
+    branches: ["main"]
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+
+    # ------------------------------------------------------------------------
+    # Permissions required for GitHub Packages
+    # ------------------------------------------------------------------------
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # ======================================================================
+      # STEP 1: Checkout repository
+      #
+      # fetch-depth: 2 is IMPORTANT
+      # → allows git diff between previous and current commit
+      # ======================================================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # ======================================================================
+      # STEP 2: Setup Java (used for Maven builds)
+      # ======================================================================
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+
+      # ======================================================================
+      # STEP 3: Install OpenAPI Generator CLI
+      # ======================================================================
+      - name: Install OpenAPI Generator
+        run: |
+          npm install -g @openapitools/openapi-generator-cli
+          openapi-generator-cli version
+
+      # ======================================================================
+      # STEP 4: Detect changed OpenAPI files
+      #
+      # Output:
+      # - changed_files.txt (list of OpenAPI YAMLs)
+      # - has_changes=true/false
+      # ======================================================================
+      - name: Detect changed OpenAPI specs
+        id: changes
+        run: |
+          echo "🔍 Detecting OpenAPI changes..."
+
+          BEFORE="${{ github.event.before }}"
+
+          # First push OR manual run → take all OpenAPI files
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || [ -z "$BEFORE" ]; then
+            echo "First run detected – taking all OpenAPI specs"
+            git ls-files "services/*/*-openapi.y*ml" > changed_files.txt
+          else
+            # Only take modified or added OpenAPI files
+            git diff --name-status "$BEFORE" "${{ github.sha }}" \
+              | awk '$1 != "D" { print $2 }' \
+              | grep -E "^services/[^/]+/[^/]+-openapi\.ya?ml$" \
+              > changed_files.txt || true
+          fi
+
+          # If no OpenAPI files changed → skip pipeline
+          if [ ! -s changed_files.txt ]; then
+            echo "❌ No OpenAPI changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ OpenAPI files detected:"
+            cat changed_files.txt
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      # ======================================================================
+      # STEP 5: Validate OpenAPI specs
+      #
+      # Uses swagger-cli for fast validation
+      # ======================================================================
+      - name: Validate OpenAPI specs
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          npm install -g @apidevtools/swagger-cli
+
+          while IFS= read -r file; do
+            echo "🧪 Validating $file"
+            swagger-cli validate "$file"
+          done < changed_files.txt
+
+      # ======================================================================
+      # STEP 6: Generate Java SDKs
+      #
+      # For EACH OpenAPI file:
+      # - Java 8
+      # - Java 17
+      # - Java 21
+      #
+      # Delegates heavy logic to shell scripts
+      # ======================================================================
+      - name: Generate Java SDKs
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          chmod +x scripts/*.sh
+          chmod +x scripts/fixes/*.sh
+
+          while IFS= read -r SPEC; do
+            echo "🚀 Generating SDKs for $SPEC"
+            ./scripts/generate.sh "$SPEC"
+          done < changed_files.txt
+
+      # ======================================================================
+      # STEP 7: Configure Maven for GitHub Packages
+      #
+      # This enables `mvn deploy` to publish artifacts
+      # ======================================================================
+      - name: Configure Maven settings
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          mkdir -p ~/.m2
+
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      # ======================================================================
+      # STEP 8: Publish SDKs to GitHub Packages
+      #
+      # Each generated SDK already contains:
+      # - Correct groupId
+      # - artifactId
+      # - version
+      # - distributionManagement
+      # ======================================================================
+      - name: Publish SDKs
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for dir in generated/*/*; do
+            echo "📦 Publishing $(basename "$dir")"
+            cd "$dir"
+            mvn clean deploy -DskipTests
+            cd -
+          done
+
+      # ======================================================================
+      # STEP 9: Summary (GitHub UI)
+      # ======================================================================
+      - name: Summary
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "## 🚀 Java SDKs Generated & Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          while IFS= read -r file; do
+            SERVICE=$(basename "$file" | sed 's/-openapi\.ya\?ml//')
+            VERSION=$(grep -E '^[[:space:]]*version:' "$file" | head -1 | sed 's/.*: *//')
+
+            echo "### 📦 $SERVICE (v$VERSION)" >> $GITHUB_STEP_SUMMARY
+            echo "- Java 8" >> $GITHUB_STEP_SUMMARY
+            echo "- Java 17" >> $GITHUB_STEP_SUMMARY
+            echo "- Java 21" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done < changed_files.txt
