@@ -3,52 +3,43 @@
 # generate.sh
 #
 # - Generates Java SDKs (8 / 17 / 21) for ONE OpenAPI spec
+# - Version is passed explicitly from CI
 # - Applies all post-generation fixes
 # - CI-safe (NO mvn install / deploy here)
 #
 # Called by GitHub Actions:
-#   ./scripts/generate.sh services/foo/foo-openapi.yaml
+#   ./scripts/generate.sh services/foo/foo-openapi.yaml 1.2.0
 # ============================================================================
 
 set -euo pipefail
 
 SPEC_FILE="$1"
+VERSION="$2"
 
 if [[ -z "${SPEC_FILE:-}" || ! -f "$SPEC_FILE" ]]; then
   echo "❌ OpenAPI spec not found: $SPEC_FILE"
   exit 1
 fi
 
-# ---------------------------------------------------------------------------
-# Derive service name and version
-# ---------------------------------------------------------------------------
-SERVICE_NAME=$(basename "$SPEC_FILE" | sed 's/-openapi\.ya\?ml$//')
-
-VERSION=$(grep -E '^[[:space:]]*version:' "$SPEC_FILE" \
-  | head -1 \
-  | sed 's/.*: *//' \
-  | tr -d '"')
-
-if [[ -z "$VERSION" ]]; then
-  echo "❌ info.version missing in $SPEC_FILE"
+if [[ -z "${VERSION:-}" ]]; then
+  echo "❌ Version not provided"
   exit 1
 fi
+
+SERVICE_NAME=$(basename "$SPEC_FILE" | sed 's/-openapi\.ya\?ml$//')
 
 GROUP_ID="com.harsh.openapi"
 BASE_OUT="generated/${SERVICE_NAME}"
 
 mkdir -p "$BASE_OUT"
 
-# ---------------------------------------------------------------------------
-# Generate SDK for a specific Java version
-# ---------------------------------------------------------------------------
 generate() {
   local JAVA_VER="$1"
   local DATE_LIB="$2"
   local LIBRARY="$3"
   local OUT_DIR="${BASE_OUT}/java-${JAVA_VER}"
 
-  echo "🚀 Generating Java ${JAVA_VER} SDK"
+  echo "🚀 Generating Java ${JAVA_VER} SDK (v${VERSION})"
 
   ADDITIONAL_PROPS="groupId=${GROUP_ID},artifactId=${SERVICE_NAME}-sdk-java${JAVA_VER},artifactVersion=${VERSION},dateLibrary=${DATE_LIB},library=${LIBRARY},hideGenerationTimestamp=true"
 

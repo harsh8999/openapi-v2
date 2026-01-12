@@ -27,7 +27,7 @@ jobs:
 
     # Required for publishing to GitHub Packages
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -55,13 +55,11 @@ jobs:
       - name: Install OpenAPI Generator CLI
         run: |
           npm install -g @openapitools/openapi-generator-cli
-          openapi-generator-cli version
+          npm install -g @apidevtools/swagger-cli
+          npm install -g openapi-diff
 
       # ======================================================================
       # STEP 4: Detect changed OpenAPI files
-      # Produces:
-      # - changed_files.txt
-      # - has_changes=true|false
       # ======================================================================
       - name: Detect changed OpenAPI specs
         id: changes
@@ -70,7 +68,6 @@ jobs:
 
           BEFORE="${{ github.event.before }}"
 
-          # First push OR manual run → take all OpenAPI specs
           if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || [ -z "$BEFORE" ]; then
             echo "First run detected – taking all OpenAPI specs"
             git ls-files "services/*/*-openapi.y*ml" > changed_files.txt
@@ -96,55 +93,98 @@ jobs:
       - name: Validate OpenAPI specs
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          npm install -g @apidevtools/swagger-cli
-
           while IFS= read -r file; do
             echo "🧪 Validating $file"
             swagger-cli validate "$file"
           done < changed_files.txt
 
       # ======================================================================
-      # STEP 6: Generate Java SDKs (delegated to scripts/generate.sh)
+      # STEP 6: Decide FINAL VERSION per OpenAPI spec
+      # ======================================================================
+      - name: Decide final versions
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "🔢 Deciding final versions per OpenAPI spec"
+          > version_map.txt
+
+          while IFS= read -r SPEC; do
+            echo "➡️ Processing $SPEC"
+
+            OLD_VERSION=$(git show ${{ github.event.before }}:"$SPEC" 2>/dev/null \
+              | grep -E '^[[:space:]]*version:' | head -1 | sed 's/.*: *//' || true)
+
+            NEW_VERSION=$(grep -E '^[[:space:]]*version:' "$SPEC" \
+              | head -1 | sed 's/.*: *//')
+
+            git show ${{ github.event.before }}:"$SPEC" > old.yaml 2>/dev/null || true
+            cp "$SPEC" new.yaml
+
+            BUMP="patch"
+
+            if [ -f old.yaml ]; then
+              DIFF=$(openapi-diff old.yaml new.yaml || true)
+
+              if echo "$DIFF" | grep -q BREAKING; then
+                BUMP="major"
+              elif echo "$DIFF" | grep -q ADDED; then
+                BUMP="minor"
+              fi
+            fi
+
+            IFS=. read MAJOR MINOR PATCH <<< "${OLD_VERSION%-SNAPSHOT}"
+
+            case "$BUMP" in
+              major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+              minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH+1)) ;;
+            esac
+
+            FINAL_VERSION="$MAJOR.$MINOR.$PATCH"
+
+            echo "✅ $SPEC → $FINAL_VERSION ($BUMP)"
+            echo "$SPEC=$FINAL_VERSION" >> version_map.txt
+          done < changed_files.txt
+
+          echo "📄 Version map:"
+          cat version_map.txt
+
+      # ======================================================================
+      # STEP 7: Generate Java SDKs (version passed explicitly)
       # ======================================================================
       - name: Generate Java SDKs
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          # Safe chmod (avoids CI failures)
           find scripts -type f -name "*.sh" -exec chmod +x {} +
 
-          while IFS= read -r SPEC; do
-            echo "🚀 Generating SDKs for $SPEC"
-            ./scripts/generate.sh "$SPEC"
-          done < changed_files.txt
+          while IFS='=' read -r SPEC VERSION; do
+            echo "🚀 Generating SDKs for $SPEC with version $VERSION"
+            ./scripts/generate.sh "$SPEC" "$VERSION"
+          done < version_map.txt
 
       # ======================================================================
-      # STEP 7: Inject distributionManagement into generated POMs
-      # REQUIRED for mvn deploy to GitHub Packages
+      # STEP 8: Inject distributionManagement into generated POMs
       # ======================================================================
       - name: Inject Maven distributionManagement
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           for pom in generated/*/*/pom.xml; do
             echo "🔧 Updating $pom"
-
             sed -i '/<\/project>/i \
             <distributionManagement>\
               <repository>\
                 <id>github</id>\
-                <name>GitHub Packages</name>\
                 <url>https://maven.pkg.github.com/${{ github.repository }}</url>\
               </repository>\
             </distributionManagement>' "$pom"
           done
 
       # ======================================================================
-      # STEP 8: Configure Maven authentication
+      # STEP 9: Configure Maven authentication
       # ======================================================================
       - name: Configure Maven settings
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           mkdir -p ~/.m2
-
           cat > ~/.m2/settings.xml <<EOF
           <settings>
             <servers>
@@ -158,36 +198,24 @@ jobs:
           EOF
 
       # ======================================================================
-      # STEP 9: Publish SDKs to GitHub Packages
+      # STEP 10: Publish SDKs
       # ======================================================================
       - name: Publish SDKs
         if: steps.changes.outputs.has_changes == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for dir in generated/*/*; do
             echo "📦 Publishing $(basename "$dir")"
             cd "$dir"
-            mvn clean deploy -DskipTests
+            mvn deploy -DskipTests
             cd -
           done
 
       # ======================================================================
-      # STEP 10: Summary (GitHub UI)
+      # STEP 11: Summary
       # ======================================================================
       - name: Summary
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           echo "## 🚀 Java SDKs Generated & Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          while IFS= read -r file; do
-            SERVICE=$(basename "$file" | sed 's/-openapi\.ya\?ml//')
-            VERSION=$(grep -E '^[[:space:]]*version:' "$file" | head -1 | sed 's/.*: *//')
-
-            echo "### 📦 $SERVICE (v$VERSION)" >> $GITHUB_STEP_SUMMARY
-            echo "- Java 8" >> $GITHUB_STEP_SUMMARY
-            echo "- Java 17" >> $GITHUB_STEP_SUMMARY
-            echo "- Java 21" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          done < changed_files.txt
+          cat version_map.txt >> $GITHUB_STEP_SUMMARY
